@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      forum_comments.belongsTo(Forum, {foreignKey:'forum_id'})
-      forum_comments.belongsTo(User, {foreignKey:'user_id'})
+      forum_comments.belongsTo(models.Forum, {foreignKey:'id'})
+      forum_comments.belongsTo(models.User, {foreignKey:'id'})
     }
   }
   forum_comments.init({
