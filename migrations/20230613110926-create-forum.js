@@ -12,7 +12,7 @@ module.exports = {
       author: {
         type: Sequelize.STRING
       },
-      name: {
+      title: {
         type: Sequelize.STRING
       },
       descrition: {

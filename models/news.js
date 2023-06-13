@@ -1,6 +1,4 @@
 'use strict';
-const Comment = require('./comment'); 
-
 const {
   Model
 } = require('sequelize');
@@ -12,14 +10,14 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      News.hasMany(models.Comment);
+      News.hasMany(models.news_comments, {foreignKey:'id'})
     }
   }
   News.init({
     title: DataTypes.STRING,
     category: DataTypes.STRING,
-    content: DataTypes.STRING,
-    id_comment: DataTypes.INTEGER
+    content: DataTypes.TEXT,
+    pictures: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'News',
