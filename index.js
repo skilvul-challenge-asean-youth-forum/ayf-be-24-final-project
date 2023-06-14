@@ -4,13 +4,14 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
 
-const secretKey = 'your-secret-key';
+const secretKey = 'a23sx-1o4p-asd2g-asd2';
 
 // memanggil module models
 const UserModel = require('./models').User;
 const ProfileModel = require('./models').Profile;
 const ForumModel = require('./models').Forum;
 const ForumCommentModel = require('./models').forum_comments;
+const NewsModel = require('./models').News;
 
 const app = express()
 
@@ -143,8 +144,18 @@ app.get('/forums/:id/comment', authenticateToken, async function (req, res) {
       {
       where:{
         forum_id : forum_id
-      }, include: ["User","Forum"]
-    } 
+      }, include: [
+        {
+          model:UserModel,
+          attributes:['id'],
+          include:[{model:ProfileModel,attributes:['picture']}]
+        }, 
+        {
+          model:ForumModel,
+          attributes:['author','title','createdAt']
+        }
+      ]
+    }
     );
 
     res.status(200).json(ForumComments);
@@ -155,7 +166,18 @@ app.get('/forums/:id/comment', authenticateToken, async function (req, res) {
   }
 });
 
+//  endpoint untuk mengambil semua data News
+app.get('/news', async function (req, res) {
+  try {
+    const News = await NewsModel.findAll();
 
+    res.status(200).json(News);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message || 'internal server error'
+    });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Aplikasi berhasil dijalankan : ${port}`)
