@@ -61,7 +61,7 @@ app.post('/register', upload.single('picture'), async (req, res) => {
     // Buat posting baru di tabel Post dan hubungkan dengan pengguna yang baru dibuat
     const newProfile = await ProfileModel.create({ user_id: newUser.id, no_hp, age, city, country, picture: imageFile.filename });
 
-    res.json({ user: newUser, post: newProfile });
+    res.json({ user: newUser, Profile: newProfile });
   } catch (error) {
     console.error('Gagal membuat akun:', error);
     res.status(500).json({ error: 'Terjadi kesalahan pada server' });
