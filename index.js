@@ -143,8 +143,18 @@ app.get('/forums/:id/comment', authenticateToken, async function (req, res) {
       {
       where:{
         forum_id : forum_id
-      }, include: ["User","Forum"]
-    } 
+      }, include: [
+        {
+          model:UserModel,
+          attributes:['id'],
+          include:[{model:ProfileModel,attributes:['picture']}]
+        }, 
+        {
+          model:ForumModel,
+          attributes:['author','title','createdAt']
+        }
+      ]
+    }
     );
 
     res.status(200).json(ForumComments);
