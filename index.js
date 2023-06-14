@@ -9,6 +9,7 @@ const secretKey = 'your-secret-key';
 // memanggil module models
 const UserModel = require('./models').User;
 const ProfileModel = require('./models').Profile;
+const ForumModel = require('./models').Forum;
 
 const app = express()
 
@@ -88,6 +89,33 @@ app.post('/register', async (req, res) => {
     }
   });
 
+  // endpoint untuk forum
   app.listen(port, () => {
     console.log(`Aplikasi berhasil dijalankan : ${port}`)
 })
+
+//   Menampilkan data forum dengna jumlah yang dibatasi per halaman
+  app.get('/forum', async (req, res) => {
+    try {
+      const page = parseInt(req.query.page) || 1; // Halaman saat ini
+      const limit = 3; // Jumlah data per halaman
+  
+      const offset = (page - 1) * limit; // Offset data
+  
+      const { count, rows } = await ForumModel.findAndCountAll({
+        limit,
+        offset,
+      });
+  
+      const totalPages = Math.ceil(count / limit); // Jumlah total halaman
+  
+      res.json({
+        page,
+        totalPages,
+        data: rows,
+      });
+    } catch (error) {
+      console.error('Gagal mendapatkan data forum:', error);
+      res.status(500).json({ error: 'Terjadi kesalahan pada server' });
+    }
+  });
