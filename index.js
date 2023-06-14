@@ -1,12 +1,15 @@
+// mengimport Library
 const express = require('express')
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
+const multer = require('multer');
 
 const secretKey = 'a23sx-1o4p-asd2g-asd2';
+const upload = multer({ dest: 'uploads/' });
 
-// memanggil module models
+// Import models
 const UserModel = require('./models').User;
 const ProfileModel = require('./models').Profile;
 const ForumModel = require('./models').Forum;
@@ -35,10 +38,11 @@ db.connect((err) => {
 });
 
 // endpoint untuk register user 
-app.post('/register', async (req, res) => {
+app.post('/register', upload.single('picture'), async (req, res) => {
   try {
     // Tangkap data User dari body permintaan
     const { fullname, password, email} = req.body;
+    
 
     // Mengenkripsi password menggunakan bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -51,10 +55,11 @@ app.post('/register', async (req, res) => {
     })
 
     // Tangkap data Profile dari body permintaan
-    const { no_hp, age, city, country, picture } = req.body;
+    const { no_hp, age, city, country } = req.body;
+    const imageFile = req.file; // Dapatkan file gambar dari request
 
     // Buat posting baru di tabel Post dan hubungkan dengan pengguna yang baru dibuat
-    const newProfile = await ProfileModel.create({ user_id: newUser.id, no_hp, age, city, country, picture });
+    const newProfile = await ProfileModel.create({ user_id: newUser.id, no_hp, age, city, country, picture: imageFile.filename });
 
     res.json({ user: newUser, post: newProfile });
   } catch (error) {
@@ -112,7 +117,7 @@ function authenticateToken(req, res, next) {
 }
 
 //   Menampilkan data forum dengna jumlah yang dibatasi per halaman
-app.get('/forum', async (req, res) => {
+app.get('/forums', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; // Halaman saat ini
     const limit = 6; // Jumlah data per halaman
@@ -134,6 +139,27 @@ app.get('/forum', async (req, res) => {
   } catch (error) {
     console.error('Gagal mendapatkan data forum:', error);
     res.status(500).json({ error: 'Terjadi kesalahan pada server' });
+  }
+});
+
+// endpoint untuk mengirim data forum
+app.post('/forums', upload.single('picture'), authenticateToken, async (req, res) => {
+  const { author, title, descrition } = req.body;
+  const imageFile = req.file; // Dapatkan file gambar dari request
+
+  try {
+    // Simpan data post ke database
+    const ForumModels = await ForumModel.create({
+      author,
+      title,
+      descrition,
+      picture: imageFile.filename // Simpan nama file gambar ke dalam kolom image
+    });
+
+    return res.json({ message: 'Forum created', ForumModels });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
