@@ -4,13 +4,14 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
 
-const secretKey = 'your-secret-key';
+const secretKey = 'a23sx-1o4p-asd2g-asd2';
 
 // memanggil module models
 const UserModel = require('./models').User;
 const ProfileModel = require('./models').Profile;
 const ForumModel = require('./models').Forum;
 const ForumCommentModel = require('./models').forum_comments;
+const NewsModel = require('./models').News;
 
 const app = express()
 
@@ -36,16 +37,17 @@ db.connect((err) => {
 app.post('/register', async (req, res) => {
   try {
     // Tangkap data User dari body permintaan
-    const { username, password, email } = req.body;
+    const { fullname, password, email, age } = req.body;
 
     // Mengenkripsi password menggunakan bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Menyimpan data user baru ke database
     const newUser = await UserModel.create({
-      username,
+      fullname,
       password: hashedPassword,
-      email
+      email,
+      age
     })
 
     // Tangkap data Profile dari body permintaan
@@ -64,13 +66,14 @@ app.post('/register', async (req, res) => {
 // endpoint untuk login
 app.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    // Mencari user berdasarkan username
-    const user = await UserModel.findOne({ where: { username } });
+    // Mencari user berdasarkan email
+    const user = await UserModel.findOne({ where: { email } });
+    const user_id = user.id;
 
     if (!user) {
-      return res.status(404).send('Username tidak ditemukan');
+      return res.status(404).send('email tidak ditemukan');
     }
 
     // Membandingkan password yang diinputkan dengan password di database menggunakan bcrypt
@@ -81,9 +84,9 @@ app.post('/login', async (req, res) => {
     }
 
     // Membuat token JWT
-    const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
+    const token = jwt.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
 
-    res.json({ token });
+    res.json({ token, email, user_id });
   } catch (error) {
     console.error('Gagal login:', error);
     res.status(500).json({ error: 'Terjadi kesalahan pada server' });
@@ -108,12 +111,11 @@ function authenticateToken(req, res, next) {
   });
 }
 
-
 //   Menampilkan data forum dengna jumlah yang dibatasi per halaman
 app.get('/forum', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; // Halaman saat ini
-    const limit = 3; // Jumlah data per halaman
+    const limit = 6; // Jumlah data per halaman
 
     const offset = (page - 1) * limit; // Offset data
 
@@ -156,8 +158,50 @@ app.get('/forums/:id/comment', authenticateToken, async function (req, res) {
       ]
     }
     );
-
     res.status(200).json(ForumComments);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message || 'internal server error'
+    });
+  }
+});
+
+// endpoint untuk post komentar sesuai dengan forum yang dipilih
+app.post('/forums/comments', authenticateToken, async function (req, res) {
+  try {
+    // Tangkap data User dari body permintaan
+    const { comment, forum_id } = req.body;
+    
+    // Cari user berdasarkan id yang diperoleh dari token
+    
+    const user_id = await UserModel.findOne({ 
+      where: { email: req.user.email }, attributes:['id'] });
+      // res.json(user_id);next();
+    if (!user_id) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Menyimpan data user baru ke database
+    
+    const postComment = await ForumCommentModel.create({
+      forum_id,
+      user_id,
+      comment
+    })
+
+    res.json(postComment);
+    
+  } catch (error) {
+    console.error('Gagal memposting komentar:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan pada server' });
+  }
+});
+
+//  endpoint untuk mengambil semua data News
+app.get('/news', async function (req, res) {
+  try {
+    const News = await NewsModel.findAll();
+
+    res.status(200).json(News);
   } catch (err) {
     res.status(500).json({
       message: err.message || 'internal server error'
