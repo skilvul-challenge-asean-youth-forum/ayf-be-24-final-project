@@ -12,6 +12,7 @@ const ProfileModel = require('./models').Profile;
 const ForumModel = require('./models').Forum;
 const ForumCommentModel = require('./models').forum_comments;
 const NewsModel = require('./models').News;
+const NewsCommentModel = require('./models').news_comments;
 
 const app = express()
 
@@ -37,7 +38,7 @@ db.connect((err) => {
 app.post('/register', async (req, res) => {
   try {
     // Tangkap data User dari body permintaan
-    const { fullname, password, email, age } = req.body;
+    const { fullname, password, email} = req.body;
 
     // Mengenkripsi password menggunakan bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -46,15 +47,14 @@ app.post('/register', async (req, res) => {
     const newUser = await UserModel.create({
       fullname,
       password: hashedPassword,
-      email,
-      age
+      email
     })
 
     // Tangkap data Profile dari body permintaan
-    const { user_id, no_hp, city, country, picture } = req.body;
+    const { no_hp, age, city, country, picture } = req.body;
 
     // Buat posting baru di tabel Post dan hubungkan dengan pengguna yang baru dibuat
-    const newProfile = await ProfileModel.create({ user_id: newUser.id, no_hp, city, country, picture });
+    const newProfile = await ProfileModel.create({ user_id: newUser.id, no_hp, age, city, country, picture });
 
     res.json({ user: newUser, post: newProfile });
   } catch (error) {
@@ -202,6 +202,57 @@ app.get('/news', async function (req, res) {
     const News = await NewsModel.findAll();
 
     res.status(200).json(News);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message || 'internal server error'
+    });
+  }
+});
+
+// endpoint untuk post komentar sesuai dengan forum yang dipilih
+app.post('/news/comments', authenticateToken, async function (req, res) {
+  try {
+    // Tangkap data User dari body permintaan
+    const { comment, news_id } = req.body;
+    
+    // Cari user berdasarkan id yang diperoleh dari token
+    const user_id = await UserModel.findOne({ 
+      where: { email: req.user.email }, attributes:['id'] });
+
+    if (!user_id) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Menyimpan data user baru ke database
+    
+    const postComment = await NewsCommentModel.create({
+      news_id,
+      user_id,
+      comment
+    })
+
+    res.json(postComment);
+    
+  } catch (error) {
+    console.error('Gagal memposting komentar:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan pada server' });
+  }
+});
+
+// endpoint untuk menangkap semua data komentar berdasarkan news
+app.get('/news/:id/comments', async function (req, res) {
+  const news_id = req.params.id
+  try {
+    const NewsComment = await NewsCommentModel.findAll(
+      {
+        where:{news_id:news_id},
+        include:[{
+          model: UserModel,
+          attributes:['fullname'],
+          include:[{model:ProfileModel, attributes:['picture']}]
+        }]
+    }
+    );
+    res.status(200).json(NewsComment);
   } catch (err) {
     res.status(500).json({
       message: err.message || 'internal server error'
