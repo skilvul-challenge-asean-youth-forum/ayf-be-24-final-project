@@ -1,6 +1,10 @@
 # AYF-BE-24-FINAL-PROJECT
 
+- Link Deploy RESTful dengan Railway: https://backend-service-dev.up.railway.app/
+- Link BRD : https://whimsical.com/brd-asean-youth-forum-fe42-YKm8iWc9qeTWE2hbeVahYr
+- Link ERD: https://dbdiagram.io/d/648725e9722eb77494d14573
 
+ 
 # API Specification
 
 - ## User Model
