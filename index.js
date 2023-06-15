@@ -23,20 +23,6 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 const port = 3000
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '', // Ganti dengan password MySQL Anda
-  database: 'db_forum2' // Ganti dengan nama database yang telah Anda buat
-});
-
-db.connect((err) => {
-  if (err) {
-    throw err;
-  }
-  console.log('Connected to MySQL database');
-});
-
 // endpoint untuk register user 
 app.post('/register', upload.single('picture'), async (req, res) => {
   try {
@@ -293,6 +279,104 @@ app.get('/news/:id/comments', async function (req, res) {
     res.status(500).json({
       message: err.message || 'internal server error'
     });
+  }
+});
+
+// endpoint untuk menghapus data user dan relasinya berdasarkan id
+app.delete('/users/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Cari user berdasarkan ID
+    const user = await UserModel.findOne({ where: { id: userId } });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Hapus ForumCommentModel yang berelasi dengan user
+    await ForumCommentModel.destroy({ where: { user_id: userId } });
+    // Hapus NewsCommentModel yang berelasi dengan user
+    await NewsCommentModel.destroy({ where: { user_id: userId } });
+    // Hapus profil yang berelasi dengan user
+    await ProfileModel.destroy({ where: { user_id: userId } });
+    // Hapus user
+    await UserModel.destroy({ where: { id: userId } });
+
+    return res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// endpoint untuk menghapus data forum berdasarkan id
+app.delete('/forums/:id', async (req, res) => {
+  const  forumId  = req.params.id;
+
+  try {
+    // Cari forum berdasarkan ID
+    const user = await ForumModel.findOne({ where: { id: forumId } });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Hapus forum yang berelasi dengan ForumCommentModel
+    await ForumCommentModel.destroy({ where: { forum_id: forumId } });
+    await ForumModel.destroy({ where: { id: forumId } });
+
+    return res.json({ message: 'Forum deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// endpoint untuk menghapus data news berdasarkan id
+app.delete('/news/:id', async (req, res) => {
+  const newsId = req.params.id;
+
+  try {
+    // Cari forum berdasarkan ID
+    const user = await NewsModel.findOne({ where: { id: newsId } });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Hapus forum yang berelasi dengan ForumCommentModel
+    await NewsCommentModel.destroy({ where: { forum_id: newsId } });
+    await NewsModel.destroy({ where: { id: newsId } });
+
+    return res.json({ message: 'News deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// endpoint untuk menghapus data komen pada forum berdasarkan id
+app.delete('/forums/:id/comment', async (req, res) => {
+  const  commentId = req.params.id;
+  // res.json(commentId);next()
+  try {
+    await ForumCommentModel.destroy({ where: { id: commentId } });
+    return res.json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// endpoint untuk menghapus data komen pada news berdasarkan id
+app.delete('/news/:id/comment', async (req, res) => {
+  const commentId = req.params.id;
+
+  try {
+
+    await NewsCommentModel.destroy({ where: { id: commentId } });
+    return res.json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
