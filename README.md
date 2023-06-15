@@ -1,10 +1,10 @@
 # AYF-BE-24-FINAL-PROJECT
 
-- Link Deploy RESTful dengan Railway: https://backend-service-dev.up.railway.app/
+- Link Deploy RESTful dengan Railway: https://backend-service-dev.up.railway.app/ENDPOINT
 - Link BRD : https://whimsical.com/brd-asean-youth-forum-fe42-YKm8iWc9qeTWE2hbeVahYr
 - Link ERD: https://dbdiagram.io/d/648725e9722eb77494d14573
 
- 
+ * 'ENDPOINT' ganti dengan alamat endpoint dibutuhkan 
 # API Specification
 
 - ## User Model
@@ -176,8 +176,8 @@
     "forum_id": 1,
     "user_id": 1,
     "comment": "String",
-    "updatedAt": "2023-06-15T15:17:37.492Z",
-    "createdAt": "2023-06-15T15:17:37.492Z"
+    "updatedAt": "Date",
+    "createdAt": "Date"
 }
 ```
 
@@ -193,18 +193,18 @@
     ```javascript
     {
     "comment": "String",
-    "news_id": "Integer"
+    "news_id": "id of news"
     }
     ```
   - Response :
     ```javascript
     {
-    "id": 34,
-    "news_id": 1,
-    "user_id": 1,
+    "id": "Integer",
+    "news_id": "id of news,
+    "user_id": "id of user,
     "comment": "String",
-    "updatedAt": "2023-06-15T15:17:37.492Z",
-    "createdAt": "2023-06-15T15:17:37.492Z"
+    "updatedAt": "Date",
+    "createdAt": "Date"
     }
     ```
 
@@ -265,7 +265,7 @@
        - Accept : application/json
        - Paremeter :
 
-       "/news/id_of_news/comments"
+       `/news/id_of_news/comments"
        
       - Body :
       
