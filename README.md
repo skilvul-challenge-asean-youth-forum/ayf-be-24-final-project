@@ -89,22 +89,204 @@
       {
           "fullname" : "String ",
           "password" : "String ",
-          "email" : "Id of role - required",
+          "email" : "String",
           "picture" : "File",
-          "no_hp" : "String - required - unique",
-          "age" : "String - required - unique",
-          "city" : "String - required - unique",
-          "country" : "String - required - unique",
+          "no_hp" : "String - required ",
+          "age" : "String - required ",
+          "city" : "String - required ",
+          "country" : "String - required",
       }
     ```
 
    - Response :
 
     ```javascript
-        {
-            "status":"201 Created",
-            "message":"Your Account was registered"
-        }
+    {
+      "user": {
+          "id": "id of user",
+          "fullname": "String",
+          "password": "Text - required",
+          "email": "String - required",
+          "updatedAt": "Date",
+          "createdAt": "Date"
+      },
+      "Profile": {
+          "id": "id of profil",
+          "user_id": "id of user",
+          "no_hp": "String",
+          "age": "String",
+          "city": "String",
+          "country": "String",
+          "picture": "String",
+          "updatedAt": "Date",
+          "createdAt": "Date"
+      }
+  }
     ```
 
-     # BELOM SELESAI
+  - ### Login (all users)
+  
+   - Method : POST
+   - Endpoint : /login
+   - Header :
+    - Content-Type : application/json
+    - Accept : application/json
+   - Body :
+   ```javascript
+   {
+       
+       "email" : "Id of role - required"
+       "password" : "String ",
+
+   }
+ ```
+ - Response :
+ ```javascript
+ {
+  "token": "String",
+  "email": "String",
+  "user_id": "id of user",
+  "fullname": "String",
+  "picture": "String"
+}
+```
+   -
+  - ### Forum Comment (all users)
+  
+   - Method : POST
+   - Endpoint : /forums/comments
+   - Header :
+    - authorization : JSON Web Token
+    - Accept : application/json
+   - Body :
+   ```javascript
+   {
+    "comment": "String",
+    "forum_id": "Integer"
+}
+```
+   - Response :
+   ```javascript
+   {
+    "id": 34,
+    "forum_id": 1,
+    "user_id": 1,
+    "comment": "String",
+    "updatedAt": "2023-06-15T15:17:37.492Z",
+    "createdAt": "2023-06-15T15:17:37.492Z"
+}
+```
+
+  - ### News Comment (all users)
+  
+   - Method : POST
+   - Endpoint : /news/comments
+   - Header :
+    - Content-Type : application/json
+    - Accept : application/json
+    - authorization : JSON Web Token
+   - Body :
+    ```javascript
+    {
+    "comment": "String",
+    "news_id": "Integer"
+    }
+    ```
+  - Response :
+    ```javascript
+    {
+    "id": 34,
+    "news_id": 1,
+    "user_id": 1,
+    "comment": "String",
+    "updatedAt": "2023-06-15T15:17:37.492Z",
+    "createdAt": "2023-06-15T15:17:37.492Z"
+    }
+    ```
+
+  # User Endpoint
+  
+    - ### Get Forums (all users)
+
+     - Method : GET
+     - Endpoint : /forums
+     - Header :
+      - Accept : application/json
+
+     - Response :
+
+      ```javascript
+    {
+      "page": "Integer",
+    "totalPages": "Integer",
+    "data": [
+        {
+            "id": "id of forums",
+            "author": "String",
+            "title": "String",
+            "descrition": "String",
+            "picture": "String",
+            "createdAt": "Date",
+            "updatedAt": "Date"
+        },
+      }
+      ```
+    - ### Get News (all users)
+
+     - Method : GET
+     - Endpoint : /news
+     - Header :
+      - Accept : application/json
+
+     - Response :
+
+      ```javascript
+      [
+        {
+          "id": "id of news",
+          "title": "String",
+          "category": "String",
+          "content": "text",
+          "pictures": "String",
+          "createdAt": "Date",
+          "updatedAt": "Date"
+      }
+      ]
+      ```
+      - ### Get NewsComment (all users)
+
+      - Method : GET
+      - Endpoint : /news/:id/comments
+      - Header :
+       - Accept : application/json
+       - Paremeter :
+
+       "/news/id_of_news/comments"
+       
+      - Body :
+      
+       ```javascript
+           {
+             "news_id":"req.params.id"
+           }
+       ```
+      - Response :
+ 
+       ```javascript
+       [
+        {
+          "id": "integer",
+          "news_id": "id of news",
+          "user_id": "id of user",
+          "comment": "String",
+          "createdAt": "Date",
+          "updatedAt": "Date",
+          "User": {
+              "fullname": "String",
+              "Profile": {
+                  "picture": "String"
+              }
+          }
+      }
+       ]
+       ```
