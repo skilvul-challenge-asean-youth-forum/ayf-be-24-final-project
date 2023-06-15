@@ -231,6 +231,25 @@ app.get('/news', async function (req, res) {
   }
 });
 
+//  endpoint untuk mengirim data news ke database 
+app.post('/news', async function (req, res) {
+  const {title, category, content, pictures} = req.body;
+  try {
+    const News = await NewsModel.create({
+      title,
+      category,
+      content,
+      pictures
+    });
+
+    res.json(News);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message || 'internal server error'
+    });
+  }
+});
+
 // endpoint untuk post komentar sesuai dengan forum yang dipilih
 app.post('/news/comments', authenticateToken, async function (req, res) {
   try {
@@ -320,7 +339,12 @@ app.delete('/forums/:id', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    const comment = await ForumCommentModel.findOne({ where: { forum_id: forumId } });
     // Hapus forum yang berelasi dengan ForumCommentModel
+    if (!comment) {
+      await ForumModel.destroy({ where: { id: forumId } });
+      return res.json({ message: 'Forum deleted successfully' });
+    }
     await ForumCommentModel.destroy({ where: { forum_id: forumId } });
     await ForumModel.destroy({ where: { id: forumId } });
 
@@ -340,10 +364,16 @@ app.delete('/news/:id', async (req, res) => {
     const user = await NewsModel.findOne({ where: { id: newsId } });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'News not found' });
     }
+
     // Hapus forum yang berelasi dengan ForumCommentModel
-    await NewsCommentModel.destroy({ where: { forum_id: newsId } });
+    const comment = await NewsCommentModel.findOne({ where: { news_id: newsId } });
+    if (!comment) {
+      await NewsModel.destroy({ where: { id: newsId } });
+      return res.status(404).json({ message: 'News deleted succesfully' });
+    }
+    await NewsCommentModel.destroy({ where: { news_id: newsId } });
     await NewsModel.destroy({ where: { id: newsId } });
 
     return res.json({ message: 'News deleted successfully' });
