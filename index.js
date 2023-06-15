@@ -74,8 +74,18 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     // Mencari user berdasarkan email
-    const user = await UserModel.findOne({ where: { email } });
+    const user = await UserModel.findOne({ 
+      where: { email }, 
+      include:[{
+        model: ProfileModel,
+        attributes: ['picture']
+      }]
+     });
+
+    //  menangkap data dari UserModel berelasi dengan profileModel
     const user_id = user.id;
+    const fullname = user.fullname;
+    const picture = user.Profile.picture
 
     if (!user) {
       return res.status(404).send('email tidak ditemukan');
@@ -91,7 +101,7 @@ app.post('/login', async (req, res) => {
     // Membuat token JWT
     const token = jwt.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
 
-    res.json({ token, email, user_id });
+    res.json({ token, email, user_id, fullname, picture });
   } catch (error) {
     console.error('Gagal login:', error);
     res.status(500).json({ error: 'Terjadi kesalahan pada server' });
