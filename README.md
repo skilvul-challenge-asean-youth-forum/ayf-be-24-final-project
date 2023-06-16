@@ -125,8 +125,10 @@
           "updatedAt": "Date",
           "createdAt": "Date"
       }
-  }
+    }
     ```
+    > endpoint ini akan mendaftarkan dan menyimpan data user kedalam 2 tabel ( `user`, `profile` ) 
+
 
   - ### Login (all users)
   
@@ -136,25 +138,30 @@
     - Content-Type : application/json
     - Accept : application/json
    - Body :
+
    ```javascript
-   {
+    {
        
        "email" : "Id of role - required"
        "password" : "String ",
 
-   }
- ```
- - Response :
- ```javascript
- {
-  "token": "String",
-  "email": "String",
-  "user_id": "id of user",
-  "fullname": "String",
-  "picture": "String"
-}
-```
-   -
+    }
+    ```
+
+    - Response :
+
+    ```javascript
+    {
+        "token": "String",
+        "email": "String",
+        "user_id": "id of user",
+        "fullname": "String",
+        "picture": "String"
+    }
+    ```
+   > endpoint ini akan melakukan pengecekan data yang telah di registrasikan untuk mendapatkan kode `token` login.
+
+
   - ### Forum Comment (all users)
   
    - Method : POST
@@ -163,13 +170,16 @@
     - authorization : JSON Web Token
     - Accept : application/json
    - Body :
+
    ```javascript
    {
     "comment": "String",
     "forum_id": "Integer"
-}
-```
+    }
+   ```
+
    - Response :
+
    ```javascript
    {
     "id": 34,
@@ -178,8 +188,9 @@
     "comment": "String",
     "updatedAt": "Date",
     "createdAt": "Date"
-}
-```
+    }
+    ```
+    > endpoint ini akan sukses dijalankan ketika user telah mendapatkan token login dan berfungsi untuk mengirimkan data ke dalam tabel `forum_comment` berisi komentar dari forum tersebut.
 
   - ### News Comment (all users)
   
@@ -207,6 +218,8 @@
     "createdAt": "Date"
     }
     ```
+    > endpoint ini akan sukses dijalankan ketika user telah mendapatkan token login dan berfungsi untuk mengirimkan data ke dalam tabel `news_comment` berisi komentar dari news tersebut.
+
 
   # User Endpoint
   
@@ -218,8 +231,7 @@
       - Accept : application/json
 
      - Response :
-
-      ```javascript
+     ```javascript
     {
       "page": "Integer",
     "totalPages": "Integer",
@@ -233,8 +245,12 @@
             "createdAt": "Date",
             "updatedAt": "Date"
         },
+        ]
       }
+      
       ```
+
+     
     - ### Get News (all users)
 
      - Method : GET
@@ -294,3 +310,86 @@
       }
        ]
        ```
+       # Endpoint method Delete
+
+       - ### Delete User (Developer)
+
+     - Method : Delete
+     - Endpoint : /users/:userId
+     - Header :
+      - Accept : application/json
+
+     - Response :
+     ```javascript
+    {
+    "message": "User deleted successfully"
+    }
+      ```
+    > ketika digunakan endpoint ini akan menghapus data `user` dan yang berelasi dengan user ( `profile`, `news_comment`, `forum_comment` ).
+
+
+    - ### Delete Forum (Developer)
+
+     - Method : Delete
+     - Endpoint : /forums/:id
+     - Header :
+      - Accept : application/json
+
+     - Response :
+
+     ```javascript
+    {
+    "message": "Forum deleted successfully"
+    }
+      ```
+    > endpoind ini akan menghapus forum berdasarkan `id` pada tabel forum
+
+    
+    - ### Delete News (Developer)
+
+     - Method : Delete
+     - Endpoint : /news/:id
+     - Header :
+      - Accept : application/json
+
+     - Response :
+
+     ```javascript
+    {
+    "message": "News deleted successfully"
+    }
+      ```
+    > endpoint ini akan menghapus data `news` berdasarkan `id` dari tabel News.
+
+    - ### Delete Forum Comment (Developer)
+
+     - Method : Delete
+     - Endpoint : /forums/:id:comment
+     - Header :
+      - Accept : application/json
+
+     - Response :
+
+     ```javascript
+    {
+    "message": "Comment deleted successfully"
+    }
+      ```
+    >endpoint ini akan menghapus data `forum comment` berdasarakan `id` dari tabel forum_comment.
+
+
+    - ### Delete News Comment (Developer)
+
+     - Method : Delete
+     - Endpoint : /news/:id:comment
+     - Header :
+      - Accept : application/json
+
+     - Response :
+
+     ```javascript
+    {
+    "message": "Comment deleted successfully"
+    }
+      ```
+    > endpoint ini akan menghapus data `News Comment` berdasarkan `id` dari tabel news_comment.
